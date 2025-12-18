@@ -2,161 +2,313 @@
 <html lang="fa" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>فروش لوگو</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لوگو شاپ حرفه‌ای</title>
+
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- فونت و آیکون‌ها -->
+<link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest"></script>
+
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      fontFamily: {
+        sans: ['Vazirmatn', 'sans-serif'],
+      },
+      colors: {
+        primary: '#6366f1',
+        secondary: '#4f46e5',
+        accent: '#ec4899',
+      }
+    }
+  }
+}
+</script>
 
 <style>
-body{
-  margin:0;
-  font-family:sans-serif;
-  background:#f3f4f6;
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
-.container{
-  max-width:900px;
-  margin:20px auto;
-  background:#fff;
-  padding:20px;
-  border-radius:12px;
+.line-clamp-1 {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
-h2{margin-top:0}
-input,button{
-  width:100%;
-  padding:10px;
-  margin-bottom:10px;
-  border-radius:8px;
-  border:1px solid #ccc;
+.toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #111;
+  color: #fff;
+  padding: 10px 18px;
+  border-radius: 30px;
+  opacity: 0;
+  transition: 0.3s;
+  font-size: 14px;
+  z-index: 9999;
 }
-button{
-  background:#2563eb;
-  color:#fff;
-  border:none;
-}
-.grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
-  gap:12px;
-}
-.card{
-  border:1px solid #ddd;
-  border-radius:10px;
-  padding:10px;
-}
-.card img{
-  width:100%;
-  height:140px;
-  object-fit:contain;
-}
-.telegram{
-  background:#e0f2fe;
-  padding:12px;
-  border-radius:10px;
-  text-align:center;
-  margin-bottom:15px;
-}
-.telegram a{
-  background:#229ED9;
-  color:white;
-  padding:8px 14px;
-  border-radius:8px;
-  text-decoration:none;
+.toast.show {
+  opacity: 1;
 }
 </style>
 </head>
+<body class="bg-gray-50 text-gray-800 font-sans flex flex-col min-h-screen">
 
-<body>
-<div class="container">
+<!-- نوار بالا -->
+<nav class="bg-white shadow-md sticky top-0 z-50">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex justify-between h-20 items-center">
+      <div class="flex items-center gap-2">
+        <i data-lucide="pen-tool" class="text-primary w-8 h-8 stroke-2"></i>
+        <span class="text-2xl font-bold text-gray-900 tracking-tight">لوگو <span class="text-primary">شاپ</span></span>
+      </div>
+      <div class="flex items-center gap-4">
+        <button onclick="toggleCart()" class="relative p-2 text-gray-600 hover:text-primary transition-colors group">
+          <i data-lucide="shopping-cart" class="w-6 h-6"></i>
+          <span id="cart-count" class="absolute -top-1 -right-1 bg-accent text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center scale-0 transition-transform duration-200">0</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</nav>
 
-<div class="telegram">
-  <p>سفارش از طریق تلگرام</p>
-  <a href="https://t.me/Logo_design103" target="_blank">کانال تلگرام</a>
+<!-- Hero -->
+<header class="bg-white overflow-hidden relative border-b border-gray-100">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
+    <h1 class="text-4xl md:text-6xl font-extrabold text-gray-900 mb-6">
+      گالری لوگوهای شما
+    </h1>
+    <p class="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
+      هر لوگویی که می‌خواید اضافه کنید و مدیریت کنید
+    </p>
+    <div class="text-center mb-6">
+      <p class="mb-2 font-medium">برای ثبت سفارش های خود به کانال تلگرام ما مراجعه کنید</p>
+      <a href="https://t.me/Logo_design103" target="_blank" class="bg-primary hover:bg-secondary text-white px-6 py-3 rounded-xl font-bold text-lg shadow-lg transition-all inline-flex items-center gap-2">
+        کانال تلگرام
+        <i data-lucide="arrow-up-right" class="w-5 h-5"></i>
+      </a>
+    </div>
+  </div>
+</header>
+
+<!-- فرم افزودن لوگو -->
+<main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 w-full">
+  <div class="mb-10">
+    <h2 class="text-3xl font-bold text-gray-900 mb-4">افزودن لوگو جدید</h2>
+    <form id="add-form" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
+      <input type="text" id="new-title" placeholder="عنوان لوگو" class="border rounded-lg px-3 py-2">
+      <input type="number" id="new-price" placeholder="قیمت (تومان)" class="border rounded-lg px-3 py-2">
+      <input type="text" id="new-description" placeholder="توضیح کوتاه" class="border rounded-lg px-3 py-2 col-span-2">
+      <input type="file" id="new-image" accept="image/*" class="border rounded-lg px-3 py-2 col-span-2">
+      <button type="submit" class="bg-accent hover:bg-accent/90 text-white py-2 rounded-lg col-span-2">افزودن لوگو</button>
+    </form>
+  </div>
+
+  <h2 class="text-3xl font-bold text-gray-900 mb-6">گالری لوگوها</h2>
+  <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
+</main>
+
+<!-- سبد خرید -->
+<div id="cart-modal" class="fixed inset-0 z-50 hidden">
+  <div class="absolute inset-0 overflow-hidden">
+    <div id="cart-backdrop" class="absolute inset-0 bg-gray-500 bg-opacity-75 transition-opacity opacity-0" onclick="toggleCart()"></div>
+    <div class="pointer-events-none fixed inset-y-0 left-0 flex max-w-full pl-0 sm:pl-10">
+      <div id="cart-panel" class="pointer-events-auto w-screen max-w-md transform transition ease-in-out duration-500 -translate-x-full bg-white shadow-xl flex flex-col h-full">
+        <div class="flex-1 overflow-y-auto py-6 px-4">
+          <div class="flex items-start justify-between">
+            <h2 class="text-lg font-medium text-gray-900">سبد خرید</h2>
+            <button onclick="toggleCart()" class="-m-2 p-2 text-gray-400 hover:text-gray-500">
+              <i data-lucide="x" class="w-6 h-6"></i>
+            </button>
+          </div>
+          <ul id="cart-items" class="-my-6 divide-y divide-gray-200 mt-8">
+            <li id="empty-cart-msg" class="py-10 text-center text-gray-500">لیست خالی است.</li>
+          </ul>
+        </div>
+        <div class="border-t border-gray-200 py-6 px-4 bg-gray-50">
+          <div class="flex justify-between text-base font-medium text-gray-900 mb-4">
+            <p>مجموع</p>
+            <p id="cart-total">0 تومان</p>
+          </div>
+          <button onclick="checkoutToTelegram()" class="flex items-center justify-center gap-2 rounded-md border border-transparent bg-[#229ED9] hover:bg-[#1e8wb8] px-6 py-3 text-base font-medium text-white shadow-sm w-full transition-colors">
+            ارسال سفارش به تلگرام
+            <i data-lucide="send" class="w-5 h-5"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
-<h2>افزودن لوگو</h2>
-
-<input id="title" placeholder="عنوان">
-<input id="price" type="number" placeholder="قیمت">
-<input id="file" type="file" accept="image/*">
-<button onclick="uploadLogo()">آپلود لوگو</button>
-
-<hr>
-
-<h2>لوگوها</h2>
-<div class="grid" id="grid"></div>
-
-</div>
-
-<!-- Supabase CDN -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- Toast -->
+<div id="toast" class="toast"></div>
 
 <script>
-const SUPABASE_URL = "https://qvmsxiasrclenzpfpmlk.supabase.co";
-const SUPABASE_KEY = "sb_publishable_dTIj4UbcUqIrS_XTqxhXsg_u9VCon85";
+let products = JSON.parse(localStorage.getItem('products') || '[]');
+let cart = [];
 
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-async function uploadLogo(){
-  const title = document.getElementById("title").value.trim();
-  const price = document.getElementById("price").value;
-  const file = document.getElementById("file").files[0];
-
-  if(!title || !price || !file){
-    alert("همه فیلدها رو پر کن");
-    return;
-  }
-
-  const ext = file.name.split(".").pop();
-  const fileName = "logo_" + Date.now() + "." + ext;
-
-  const { error: uploadError } = await supabase
-    .storage
-    .from("logos")
-    .upload(fileName, file, {
-      upsert:false
-    });
-
-  if(uploadError){
-    console.error(uploadError);
-    alert("آپلود فایل شکست خورد");
-    return;
-  }
-
-  const { data } = supabase
-    .storage
-    .from("logos")
-    .getPublicUrl(fileName);
-
-  await supabase.from("logos").insert({
-    title:title,
-    price:price,
-    image_url:data.publicUrl,
-    image_name:fileName
-  });
-
-  alert("لوگو با موفقیت آپلود شد");
-  loadLogos();
+function formatPrice(price) {
+  return new Intl.NumberFormat('fa-IR').format(price) + ' تومان';
 }
 
-async function loadLogos(){
-  const { data } = await supabase
-    .from("logos")
-    .select("*")
-    .order("id",{ascending:false});
+function showToast(msg, type='success') {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2000);
+}
 
-  const grid = document.getElementById("grid");
-  grid.innerHTML = "";
-
-  data.forEach(item=>{
-    grid.innerHTML += `
-      <div class="card">
-        <img src="${item.image_url}">
-        <b>${item.title}</b><br>
-        ${item.price} تومان
+function renderProducts() {
+  const grid = document.getElementById('product-grid');
+  grid.innerHTML = '';
+  if(products.length===0){
+    grid.innerHTML = '<p class="text-center col-span-full text-gray-500 py-10">هیچ لوگویی اضافه نشده.</p>';
+    return;
+  }
+  products.forEach((p,index)=>{
+    const card = document.createElement('div');
+    card.className = 'bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden flex flex-col';
+    card.innerHTML = `
+      <div class="h-40 relative bg-primary/10 flex items-center justify-center p-4">
+        ${p.image ? `<img src="${p.image}" class="h-full w-full object-contain"/>` : '<i data-lucide="image" class="w-16 h-16 text-primary opacity-50"></i>'}
+      </div>
+      <div class="p-5 flex-grow flex flex-col justify-between">
+        <div>
+          <h3 class="font-bold text-gray-900 text-lg mb-2 line-clamp-1">${p.title}</h3>
+          <p class="text-sm text-gray-600 line-clamp-2">${p.description}</p>
+          <span class="text-xl font-bold text-accent block mt-3">${formatPrice(p.price)}</span>
+        </div>
+        <div class="flex gap-2 mt-4">
+          <button onclick="addToCart(${index})" class="flex-1 py-2 rounded-lg border border-gray-200 text-gray-600 hover:border-primary hover:text-primary transition-colors">افزودن به سبد</button>
+          <button onclick="removeProduct(${index})" class="flex-1 py-2 rounded-lg border border-red-500 text-red-500 hover:bg-red-100 transition-colors">حذف</button>
+        </div>
       </div>
     `;
+    grid.appendChild(card);
   });
+  lucide.createIcons();
 }
 
-loadLogos();
+function addToCart(idx) {
+  const item = products[idx];
+  if(cart.find(i=>i.title===item.title)) { showToast('این لوگو قبلا اضافه شده','error'); return; }
+  cart.push(item);
+  updateCartUI();
+  showToast('به سبد اضافه شد');
+}
+
+function removeProduct(idx) {
+  products.splice(idx,1);
+  localStorage.setItem('products',JSON.stringify(products));
+  renderProducts();
+  showToast('لوگو حذف شد','error');
+}
+
+function updateCartUI() {
+  const cartItems = document.getElementById('cart-items');
+  const cartCount = document.getElementById('cart-count');
+  const cartTotal = document.getElementById('cart-total');
+  const emptyMsg = document.getElementById('empty-cart-msg');
+
+  cartCount.textContent = cart.length;
+  cartCount.classList.toggle('scale-0', cart.length===0);
+
+  if(cart.length===0){
+    cartItems.innerHTML = '';
+    cartItems.appendChild(emptyMsg);
+    emptyMsg.style.display='block';
+  } else {
+    emptyMsg.style.display='none';
+    cartItems.innerHTML = cart.map((item,idx)=>`
+      <li class="flex py-4 gap-4 items-center">
+        <div class="h-10 w-10 flex-shrink-0 flex items-center justify-center rounded-md border border-gray-200 bg-gray-50">
+          ${item.image? `<img src="${item.image}" class="h-full w-full object-contain"/>` : '<i data-lucide="image" class="w-6 h-6 text-gray-400"></i>'}
+        </div>
+        <div class="flex flex-1 flex-col justify-center">
+          <div class="flex justify-between text-sm font-medium text-gray-900">
+            <h3 class="line-clamp-1">${item.title}</h3>
+            <button onclick="removeFromCart(${idx})" class="text-red-500 hover:text-red-700"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+          </div>
+          <p class="text-xs text-gray-500 mt-1">${formatPrice(item.price)}</p>
+        </div>
+      </li>
+    `).join('');
+  }
+  const total = cart.reduce((sum,item)=>sum+parseInt(item.price),0);
+  cartTotal.textContent=formatPrice(total);
+  lucide.createIcons();
+}
+
+function removeFromCart(idx){
+  cart.splice(idx,1);
+  updateCartUI();
+  showToast('از سبد حذف شد','error');
+}
+
+function toggleCart() {
+  const modal=document.getElementById('cart-modal');
+  const backdrop=document.getElementById('cart-backdrop');
+  const panel=document.getElementById('cart-panel');
+  if(modal.classList.contains('hidden')){
+    modal.classList.remove('hidden');
+    setTimeout(()=>{ backdrop.classList.remove('opacity-0'); panel.classList.remove('-translate-x-full'); },10);
+  } else {
+    backdrop.classList.add('opacity-0');
+    panel.classList.add('-translate-x-full');
+    setTimeout(()=>modal.classList.add('hidden'),500);
+  }
+}
+
+function checkoutToTelegram(){
+  if(cart.length===0){ showToast('سبد خالی است','error'); return; }
+  let msg="سفارش لوگو:\n\n";
+  let total=0;
+  cart.forEach((item,idx)=>{ msg+=`${idx+1}. ${item.title} - ${formatPrice(item.price)}\n`; total+=parseInt(item.price); });
+  msg+=`\nمجموع: ${formatPrice(total)}\n`;
+  navigator.clipboard.writeText(msg).then(()=>{ showToast('متن کپی شد!'); });
+  setTimeout(()=>{ window.open("https://t.me/Logo_design103","_blank"); },1000);
+}
+
+document.getElementById('add-form').addEventListener('submit',e=>{
+  e.preventDefault();
+  const title=document.getElementById('new-title').value.trim();
+  const price=document.getElementById('new-price').value.trim();
+  const desc=document.getElementById('new-description').value.trim();
+  const file=document.getElementById('new-image').files[0];
+  if(!title||!price){ showToast('عنوان و قیمت الزامی است','error'); return; }
+
+  if(file){
+    const reader = new FileReader();
+    reader.onload = function(event){
+      products.push({title,price,description:desc,image:event.target.result});
+      localStorage.setItem('products',JSON.stringify(products));
+      renderProducts();
+      showToast('لوگو اضافه شد');
+    }
+    reader.readAsDataURL(file);
+  } else {
+    products.push({title,price,description:desc,image:null});
+    localStorage.setItem('products',JSON.stringify(products));
+    renderProducts();
+    showToast('لوگو اضافه شد');
+  }
+
+  e.target.reset();
+});
+
+document.addEventListener('DOMContentLoaded',()=>{
+  renderProducts();
+  lucide.createIcons();
+});
 </script>
 
 </body>
