@@ -18,6 +18,27 @@ body {
   padding: 20px;
   border-radius: 12px;
 }
+.telegram-box {
+  background: #eef6ff;
+  border: 1px solid #c7ddff;
+  padding: 14px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+.telegram-box p {
+  margin: 0 0 10px 0;
+  font-size: 14px;
+}
+.telegram-box a {
+  display: inline-block;
+  background: #229ED9;
+  color: #fff;
+  padding: 10px 18px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: bold;
+}
 form {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -61,6 +82,14 @@ button {
 <body>
 <div class="container">
 
+<!-- 🔵 تلگرام -->
+<div class="telegram-box">
+  <p>برای ثبت سفارش‌های خود به کانال تلگرام ما مراجعه کنید</p>
+  <a href="https://t.me/Logo_design103" target="_blank">
+    کانال تلگرام
+  </a>
+</div>
+
 <h2>افزودن لوگو</h2>
 
 <form id="form">
@@ -79,7 +108,7 @@ button {
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
-const supabase = supabase.createClient(
+const supabaseClient = supabase.createClient(
   "https://qvmsxiasrclenzpfpmlk.supabase.co",
   "sb_publishable_dTIj4UbcUqIrS_XTqxhXsg_u9VCon85"
 );
@@ -88,10 +117,15 @@ const form = document.getElementById("form");
 const grid = document.getElementById("grid");
 
 async function load() {
-  const { data } = await supabase
+  const { data, error } = await supabaseClient
     .from("logos")
     .select("*")
     .order("id", { ascending: false });
+
+  if (error) {
+    console.error(error);
+    return;
+  }
 
   grid.innerHTML = "";
   data.forEach(item => {
@@ -107,34 +141,43 @@ async function load() {
 }
 
 async function removeLogo(id, imageName) {
-  await supabase.storage.from("logos").remove([imageName]);
-  await supabase.from("logos").delete().eq("id", id);
+  await supabaseClient.storage.from("logos").remove([imageName]);
+  await supabaseClient.from("logos").delete().eq("id", id);
   load();
 }
 
 form.onsubmit = async e => {
   e.preventDefault();
 
-  const title = title.value.trim();
-  const price = price.value;
+  const titleVal = title.value.trim();
+  const priceVal = price.value;
   const file = image.files[0];
-  if (!title || !price || !file) return;
+  if (!titleVal || !priceVal || !file) return;
 
   const ext = file.name.split(".").pop();
-  const name = "logo-" + Date.now() + "." + ext;
+  const fileName = "logo-" + Date.now() + "." + ext;
 
-  await supabase.storage.from("logos").upload(name, file);
-
-  const { data } = supabase
+  const { error: uploadError } = await supabaseClient
     .storage
     .from("logos")
-    .getPublicUrl(name);
+    .upload(fileName, file);
 
-  await supabase.from("logos").insert({
-    title,
-    price,
+  if (uploadError) {
+    console.error(uploadError);
+    alert("آپلود انجام نشد");
+    return;
+  }
+
+  const { data } = supabaseClient
+    .storage
+    .from("logos")
+    .getPublicUrl(fileName);
+
+  await supabaseClient.from("logos").insert({
+    title: titleVal,
+    price: priceVal,
     image_url: data.publicUrl,
-    image_name: name
+    image_name: fileName
   });
 
   form.reset();
