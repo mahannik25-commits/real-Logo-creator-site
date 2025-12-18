@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>مدیریت لوگوها</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+      background: #f7f7f7;
+      margin: 0;
+      padding: 24px;
+      font-family: sans-serif;
+      display: flex;
+      justify-content: center;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 850px;
+      background: #fff;
+      padding: 24px;
+      border-radius: 12px;
+      border: 1px solid #e5e5e5;
+    }
+
+    h2 {
+      margin: 0 0 16px 0;
+      font-size: 20px;
+    }
+
+    form {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    input, button {
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+    }
+
+    button {
+      background: #2563eb;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #1d4ed8;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+    }
+
+    .card {
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 12px;
+      background: #fafafa;
+    }
+
+    .card img {
+      width: 100%;
+      height: 150px;
+      object-fit: contain;
+      background: #fff;
+      border-radius: 8px;
+    }
+
+    .top {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 8px;
+      font-size: 14px;
+    }
+
+    .meta {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 6px;
+      font-size: 12px;
+      color: #666;
+    }
+
+    .delete-btn {
+      background: #e11d48;
+      color: #fff;
+      border: none;
+      padding: 6px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .delete-btn:hover {
+      background: #be123c;
+    }
+
+    .toast {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #111;
+      color: #fff;
+      padding: 10px 18px;
+      border-radius: 30px;
+      opacity: 0;
+      transition: 0.2s;
+      font-size: 13px;
+    }
+
+    .toast.show {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <h2>مدیریت لوگوها</h2>
+
+  <form id="form">
+    <input type="text" id="title" placeholder="عنوان لوگو">
+    <input type="number" id="price" placeholder="قیمت">
+    <input type="file" id="image" accept="image/*">
+    <button type="submit">افزودن لوگو</button>
+  </form>
+
+  <div id="count"></div>
+  <div class="grid" id="grid"></div>
+
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script type="module">
+  import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+  // -------------------------------
+  // 🔥 اینجا URL پروژه را قرار بده
+  // مثال: "https://abcd.supabase.co"
+  const supabaseUrl = "https://qvmsxiasrclenzpfpmlk.supabase.co";
+  // -------------------------------
+
+  // -------------------------------
+  // 🔥 اینجا anon key را قرار بده
+  // مثال: "sb_publishable_123456789"
+  const supabaseAnonKey = "sb_publishable_dTIj4UbcUqIrS_XTqxhXsg_u9VCon85";
+  // -------------------------------
+
+  const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+  const form = document.getElementById("form");
+  const grid = document.getElementById("grid");
+  const count = document.getElementById("count");
+  const toast = document.getElementById("toast");
+
+  function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add("show");
+    setTimeout(() => toast.classList.remove("show"), 2000);
+  }
+
+  async function loadLogos() {
+    const { data, error } = await supabase
+      .from("logos")
+      .select("*")
+      .order("id", { ascending: false });
+
+    if (error) {
+      showToast("خطا در دریافت داده");
+      return;
+    }
+
+    grid.innerHTML = "";
+    count.textContent = data.length + " لوگو ثبت شده";
+
+    data.forEach(item => {
+      const card = document.createElement("div");
+      card.className = "card";
+
+      const img = document.createElement("img");
+      img.src = item.image_url;
+
+      const top = document.createElement("div");
+      top.className = "top";
+      top.innerHTML = `
+        <span>${item.title}</span>
+        <span>${item.price.toLocaleString("fa-IR")} تومان</span>
+      `;
+
+      const meta = document.createElement("div");
+      meta.className = "meta";
+      meta.innerHTML = `
+        <span>${item.image_name}</span>
+        <button class="delete-btn">حذف</button>
+      `;
+
+      meta.querySelector("button").onclick = () => deleteLogo(item);
+
+      card.appendChild(img);
+      card.appendChild(top);
+      card.appendChild(meta);
+
+      grid.appendChild(card);
+    });
+  }
+
+  async function deleteLogo(item) {
+    await supabase.storage.from("logos").remove([item.image_name]);
+    await supabase.from("logos").delete().eq("id", item.id);
+    showToast("حذف شد");
+    loadLogos();
+  }
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const title = document.getElementById("title").value.trim();
+    const price = Number(document.getElementById("price").value);
+    const file = document.getElementById("image").files[0];
+
+    if (!title || !price || !file) {
+      showToast("همه فیلدها لازم است");
+      return;
+    }
+
+    const ext = file.name.split(".").pop();
+    const imageName = "logo-" + Date.now() + "." + ext;
+
+    const { error: uploadError } = await supabase
+      .storage
+      .from("logos")
+      .upload(imageName, file, {
+        contentType: file.type
+      });
+
+    if (uploadError) {
+      showToast("خطا در آپلود");
+      return;
+    }
+
+    const { data: publicData } = supabase
+      .storage
+      .from("logos")
+      .getPublicUrl(imageName);
+
+    await supabase.from("logos").insert({
+      title,
+      price,
+      image_url: publicData.publicUrl,
+      image_name: imageName
+    });
+
+    showToast("ثبت شد");
+    form.reset();
+    loadLogos();
+  });
+
+  loadLogos();
+</script>
+
+</body>
+</html>
